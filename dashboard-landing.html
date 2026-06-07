@@ -1,0 +1,1141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashify — The smarter business dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet" />
+  <style>
+    /* ─── Reset & Base ─────────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #ffffff;
+      --text-primary: #1a1a1a;
+      --text-secondary: #6b7280;
+      --border: #e5e7eb;
+      --border-hover: #d1d5db;
+      --accent: #000000;
+      --space: 8px;
+      --radius-card: 6px;
+      --radius-btn: 4px;
+      --shadow: 0 1px 3px rgba(0,0,0,0.08);
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg);
+      color: var(--text-primary);
+      font-size: 15px;
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    a { color: inherit; text-decoration: none; }
+    ul { list-style: none; }
+    img { display: block; max-width: 100%; }
+
+    /* ─── Utility ───────────────────────────────────────────────────── */
+    .container {
+      max-width: 1120px;
+      margin: 0 auto;
+      padding: 0 calc(var(--space) * 3);
+    }
+
+    /* ─── Scroll-reveal base state ──────────────────────────────────── */
+    .reveal {
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity 500ms ease-out, transform 500ms ease-out;
+    }
+    .reveal.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* ─── Buttons ───────────────────────────────────────────────────── */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: calc(var(--space) * 1);
+      font-family: inherit;
+      font-size: 14px;
+      font-weight: 500;
+      border-radius: var(--radius-btn);
+      cursor: pointer;
+      border: none;
+      padding: calc(var(--space) * 1.25) calc(var(--space) * 2.5);
+      transition: background 200ms ease, color 200ms ease, border-color 200ms ease;
+      white-space: nowrap;
+    }
+    .btn-primary {
+      background: #000000;
+      color: #ffffff;
+    }
+    .btn-primary:hover { background: #333333; }
+
+    .btn-secondary {
+      background: transparent;
+      color: var(--text-primary);
+      border: 1px solid var(--border);
+    }
+    .btn-secondary:hover { background: #f3f4f6; }
+
+    .btn-lg {
+      font-size: 15px;
+      padding: calc(var(--space) * 1.5) calc(var(--space) * 3);
+    }
+
+    /* ─── 1. NAVBAR ─────────────────────────────────────────────────── */
+    .navbar {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: var(--bg);
+      border-bottom: 1px solid transparent;
+      transition: border-color 250ms ease;
+    }
+    .navbar.scrolled { border-bottom-color: var(--border); }
+
+    .navbar__inner {
+      display: flex;
+      align-items: center;
+      height: 60px;
+      gap: calc(var(--space) * 4);
+    }
+
+    .navbar__logo {
+      font-size: 17px;
+      font-weight: 700;
+      letter-spacing: -0.3px;
+      color: var(--text-primary);
+      flex-shrink: 0;
+    }
+
+    .navbar__nav {
+      display: flex;
+      align-items: center;
+      gap: calc(var(--space) * 4);
+      flex: 1;
+      justify-content: center;
+    }
+    .navbar__nav a {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text-secondary);
+      transition: color 150ms ease;
+    }
+    .navbar__nav a:hover { color: var(--text-primary); }
+
+    .navbar__actions {
+      display: flex;
+      align-items: center;
+      gap: calc(var(--space) * 2);
+      flex-shrink: 0;
+    }
+    .navbar__signin {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text-secondary);
+      transition: color 150ms ease;
+    }
+    .navbar__signin:hover { color: var(--text-primary); }
+
+    /* Navbar CTA same as btn-primary with override */
+    .navbar .btn-primary {
+      padding: calc(var(--space) * 1) calc(var(--space) * 2);
+      border-radius: var(--radius-btn);
+    }
+
+    /* ─── 2. HERO ───────────────────────────────────────────────────── */
+    .hero {
+      padding: calc(var(--space) * 16) 0 calc(var(--space) * 14);
+    }
+    .hero__inner {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: calc(var(--space) * 8);
+      align-items: center;
+    }
+
+    .hero__kicker {
+      display: inline-flex;
+      align-items: center;
+      gap: calc(var(--space) * 1);
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      margin-bottom: calc(var(--space) * 3);
+    }
+    .hero__kicker-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #10b981;
+      flex-shrink: 0;
+    }
+
+    .hero__heading {
+      font-size: clamp(36px, 4.5vw, 56px);
+      font-weight: 700;
+      line-height: 1.1;
+      letter-spacing: -1.5px;
+      color: var(--text-primary);
+      margin-bottom: calc(var(--space) * 3);
+    }
+
+    .hero__sub {
+      font-size: 17px;
+      color: var(--text-secondary);
+      line-height: 1.65;
+      max-width: 440px;
+      margin-bottom: calc(var(--space) * 5);
+    }
+
+    .hero__ctas {
+      display: flex;
+      align-items: center;
+      gap: calc(var(--space) * 2);
+      flex-wrap: wrap;
+    }
+
+    .hero__note {
+      margin-top: calc(var(--space) * 3);
+      font-size: 13px;
+      color: var(--text-secondary);
+    }
+    .hero__note span { color: var(--text-primary); font-weight: 500; }
+
+    /* Hero mockup */
+    .hero__mockup {
+      aspect-ratio: 16 / 10;
+      border-radius: 10px;
+      background: #f3f4f6;
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow), 0 8px 32px rgba(0,0,0,0.06);
+      overflow: hidden;
+      position: relative;
+    }
+    .hero__mockup-bar {
+      height: 40px;
+      background: #ffffff;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      padding: 0 16px;
+      gap: 8px;
+    }
+    .hero__mockup-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+    }
+    .hero__mockup-body {
+      padding: 20px;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+    }
+    .hero__mockup-card {
+      background: #ffffff;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-card);
+      padding: 14px;
+      box-shadow: var(--shadow);
+    }
+    .hero__mockup-card-label {
+      height: 8px;
+      background: #e5e7eb;
+      border-radius: 4px;
+      margin-bottom: 10px;
+      width: 60%;
+    }
+    .hero__mockup-card-value {
+      height: 20px;
+      background: #d1d5db;
+      border-radius: 4px;
+      width: 80%;
+    }
+    .hero__mockup-chart {
+      grid-column: span 2;
+      background: #ffffff;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-card);
+      padding: 14px;
+      box-shadow: var(--shadow);
+      display: flex;
+      align-items: flex-end;
+      gap: 6px;
+    }
+    .hero__mockup-bar-item {
+      flex: 1;
+      border-radius: 3px 3px 0 0;
+      background: #e5e7eb;
+    }
+    .hero__mockup-list {
+      background: #ffffff;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-card);
+      padding: 14px;
+      box-shadow: var(--shadow);
+    }
+    .hero__mockup-list-row {
+      height: 7px;
+      background: #e5e7eb;
+      border-radius: 4px;
+      margin-bottom: 8px;
+    }
+    .hero__mockup-list-row:last-child { margin-bottom: 0; }
+
+    /* ─── 3. LOGOS BAR ──────────────────────────────────────────────── */
+    .logos {
+      padding: calc(var(--space) * 8) 0;
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+    }
+    .logos__label {
+      text-align: center;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      margin-bottom: calc(var(--space) * 4);
+    }
+    .logos__list {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: calc(var(--space) * 8);
+      flex-wrap: wrap;
+    }
+    .logos__item {
+      font-size: 16px;
+      font-weight: 600;
+      color: #c4c9d4;
+      letter-spacing: -0.2px;
+    }
+
+    /* ─── 4. FEATURES ───────────────────────────────────────────────── */
+    .features {
+      padding: calc(var(--space) * 18) 0;
+    }
+    .section-header {
+      text-align: center;
+      margin-bottom: calc(var(--space) * 10);
+    }
+    .section-label {
+      display: inline-block;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      margin-bottom: calc(var(--space) * 2);
+    }
+    .section-heading {
+      font-size: clamp(26px, 3vw, 36px);
+      font-weight: 700;
+      letter-spacing: -0.8px;
+      color: var(--text-primary);
+      margin-bottom: calc(var(--space) * 2);
+    }
+    .section-sub {
+      font-size: 16px;
+      color: var(--text-secondary);
+      max-width: 520px;
+      margin: 0 auto;
+      line-height: 1.65;
+    }
+
+    .features__grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: calc(var(--space) * 3);
+    }
+
+    .feature-card {
+      padding: calc(var(--space) * 4);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-card);
+      background: var(--bg);
+      box-shadow: var(--shadow);
+      transition: border-color 200ms ease, transform 200ms ease;
+    }
+    .feature-card:hover {
+      border-color: var(--border-hover);
+      transform: translateY(-2px);
+    }
+
+    .feature-card__icon {
+      font-size: 24px;
+      margin-bottom: calc(var(--space) * 2.5);
+      line-height: 1;
+    }
+    .feature-card__title {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: calc(var(--space) * 1.5);
+    }
+    .feature-card__desc {
+      font-size: 14px;
+      color: var(--text-secondary);
+      line-height: 1.65;
+    }
+
+    /* ─── 5. HOW IT WORKS ───────────────────────────────────────────── */
+    .howitworks {
+      padding: calc(var(--space) * 18) 0;
+      background: #fafafa;
+    }
+    .howitworks__steps {
+      display: flex;
+      flex-direction: column;
+      gap: calc(var(--space) * 16);
+      margin-top: calc(var(--space) * 12);
+    }
+    .howitworks__step {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: calc(var(--space) * 10);
+      align-items: center;
+    }
+    .howitworks__step:nth-child(even) .howitworks__step-content { order: 2; }
+    .howitworks__step:nth-child(even) .howitworks__step-visual { order: 1; }
+
+    .howitworks__step-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: var(--text-primary);
+      color: #ffffff;
+      font-size: 14px;
+      font-weight: 700;
+      margin-bottom: calc(var(--space) * 3);
+    }
+    .howitworks__step-title {
+      font-size: 24px;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      margin-bottom: calc(var(--space) * 2);
+    }
+    .howitworks__step-desc {
+      font-size: 15px;
+      color: var(--text-secondary);
+      line-height: 1.7;
+      max-width: 400px;
+    }
+
+    .howitworks__step-visual {
+      aspect-ratio: 4 / 3;
+      border-radius: 10px;
+      background: #f3f4f6;
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+    .howitworks__step-visual-inner {
+      width: 75%;
+      height: 70%;
+      background: #ffffff;
+      border-radius: var(--radius-card);
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow);
+      padding: 20px;
+    }
+    .step-visual-line {
+      height: 8px;
+      border-radius: 4px;
+      background: #e5e7eb;
+      margin-bottom: 10px;
+    }
+    .step-visual-line.short { width: 50%; }
+    .step-visual-line.medium { width: 70%; }
+    .step-visual-box {
+      height: 48px;
+      border-radius: var(--radius-card);
+      background: #f3f4f6;
+      margin-top: 14px;
+    }
+    .step-visual-dots {
+      display: flex;
+      gap: 8px;
+      margin-top: 14px;
+    }
+    .step-visual-dot {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: #e5e7eb;
+    }
+
+    /* ─── 6. PRICING ────────────────────────────────────────────────── */
+    .pricing {
+      padding: calc(var(--space) * 18) 0;
+    }
+    .pricing__grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: calc(var(--space) * 3);
+      max-width: 760px;
+      margin: 0 auto;
+    }
+
+    .pricing-card {
+      border: 1px solid var(--border);
+      border-radius: var(--radius-card);
+      padding: calc(var(--space) * 5);
+      position: relative;
+      box-shadow: var(--shadow);
+    }
+    .pricing-card--pro {
+      background: var(--text-primary);
+      color: #ffffff;
+      border-color: var(--text-primary);
+    }
+
+    .pricing-card__badge {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.4px;
+      text-transform: uppercase;
+      background: #ffffff;
+      color: var(--text-primary);
+      border-radius: 3px;
+      padding: 3px 8px;
+      margin-bottom: calc(var(--space) * 3);
+    }
+
+    .pricing-card__name {
+      font-size: 13px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--text-secondary);
+      margin-bottom: calc(var(--space) * 1);
+    }
+    .pricing-card--pro .pricing-card__name { color: rgba(255,255,255,0.6); }
+
+    .pricing-card__price {
+      font-size: 40px;
+      font-weight: 700;
+      letter-spacing: -1.5px;
+      line-height: 1;
+      margin-bottom: calc(var(--space) * 1);
+    }
+    .pricing-card__price-note {
+      font-size: 13px;
+      color: var(--text-secondary);
+      margin-bottom: calc(var(--space) * 4);
+    }
+    .pricing-card--pro .pricing-card__price-note { color: rgba(255,255,255,0.5); }
+
+    .pricing-card__divider {
+      height: 1px;
+      background: var(--border);
+      margin: calc(var(--space) * 4) 0;
+    }
+    .pricing-card--pro .pricing-card__divider { background: rgba(255,255,255,0.12); }
+
+    .pricing-card__features {
+      display: flex;
+      flex-direction: column;
+      gap: calc(var(--space) * 2);
+      margin-bottom: calc(var(--space) * 5);
+    }
+    .pricing-card__feature {
+      display: flex;
+      align-items: flex-start;
+      gap: calc(var(--space) * 1.5);
+      font-size: 14px;
+    }
+    .pricing-card__check {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: #e5e7eb;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-top: 1px;
+    }
+    .pricing-card--pro .pricing-card__check {
+      background: rgba(255,255,255,0.15);
+    }
+    .pricing-card__check svg {
+      width: 10px;
+      height: 10px;
+      stroke: var(--text-primary);
+      fill: none;
+      stroke-width: 2.5;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+    .pricing-card--pro .pricing-card__check svg { stroke: #ffffff; }
+
+    .pricing-card .btn-primary {
+      width: 100%;
+      justify-content: center;
+      border-radius: var(--radius-btn);
+    }
+    .pricing-card--free .btn-primary {
+      background: var(--text-primary);
+    }
+    .pricing-card--pro .btn-primary {
+      background: #ffffff;
+      color: var(--text-primary);
+    }
+    .pricing-card--pro .btn-primary:hover {
+      background: #f3f4f6;
+    }
+
+    /* ─── 7. CTA BANNER ─────────────────────────────────────────────── */
+    .cta-banner {
+      background: #0f0f0f;
+      padding: calc(var(--space) * 20) 0;
+      text-align: center;
+    }
+    .cta-banner__heading {
+      font-size: clamp(28px, 3.5vw, 42px);
+      font-weight: 700;
+      letter-spacing: -1px;
+      color: #ffffff;
+      margin-bottom: calc(var(--space) * 2);
+      max-width: 560px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    .cta-banner__sub {
+      font-size: 16px;
+      color: rgba(255,255,255,0.5);
+      margin-bottom: calc(var(--space) * 6);
+      max-width: 420px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    .cta-banner .btn-primary {
+      background: #ffffff;
+      color: var(--text-primary);
+      font-size: 15px;
+      padding: calc(var(--space) * 1.75) calc(var(--space) * 4);
+    }
+    .cta-banner .btn-primary:hover { background: #f3f4f6; }
+
+    /* ─── 8. FOOTER ─────────────────────────────────────────────────── */
+    .footer {
+      padding: calc(var(--space) * 14) 0 calc(var(--space) * 8);
+      border-top: 1px solid var(--border);
+    }
+    .footer__top {
+      display: grid;
+      grid-template-columns: 1.5fr 1fr 1fr 1fr;
+      gap: calc(var(--space) * 6);
+      margin-bottom: calc(var(--space) * 10);
+    }
+    .footer__brand-name {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: calc(var(--space) * 2);
+    }
+    .footer__brand-desc {
+      font-size: 14px;
+      color: var(--text-secondary);
+      line-height: 1.65;
+      max-width: 240px;
+    }
+    .footer__col-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: calc(var(--space) * 3);
+    }
+    .footer__links {
+      display: flex;
+      flex-direction: column;
+      gap: calc(var(--space) * 2);
+    }
+    .footer__links a {
+      font-size: 14px;
+      color: var(--text-secondary);
+      transition: color 150ms ease;
+    }
+    .footer__links a:hover { color: var(--text-primary); }
+
+    .footer__bottom {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-top: calc(var(--space) * 4);
+      border-top: 1px solid var(--border);
+    }
+    .footer__copy {
+      font-size: 13px;
+      color: var(--text-secondary);
+    }
+    .footer__legal {
+      display: flex;
+      gap: calc(var(--space) * 4);
+    }
+    .footer__legal a {
+      font-size: 13px;
+      color: var(--text-secondary);
+      transition: color 150ms ease;
+    }
+    .footer__legal a:hover { color: var(--text-primary); }
+
+    /* ─── MOBILE (≤ 768px) ──────────────────────────────────────────── */
+    @media (max-width: 768px) {
+      .navbar__nav { display: none; }
+      .navbar__signin { display: none; }
+
+      .hero { padding: calc(var(--space) * 10) 0 calc(var(--space) * 8); }
+      .hero__inner {
+        grid-template-columns: 1fr;
+        gap: calc(var(--space) * 8);
+      }
+      .hero__sub { max-width: 100%; }
+
+      .features__grid { grid-template-columns: 1fr; }
+
+      .howitworks__step {
+        grid-template-columns: 1fr;
+        gap: calc(var(--space) * 6);
+      }
+      .howitworks__step:nth-child(even) .howitworks__step-content { order: 1; }
+      .howitworks__step:nth-child(even) .howitworks__step-visual { order: 2; }
+
+      .pricing__grid { grid-template-columns: 1fr; }
+
+      .footer__top {
+        grid-template-columns: 1fr 1fr;
+        gap: calc(var(--space) * 8) calc(var(--space) * 6);
+      }
+      .footer__bottom { flex-direction: column; gap: calc(var(--space) * 2); }
+
+      .logos__list { gap: calc(var(--space) * 5); }
+    }
+
+    @media (max-width: 480px) {
+      .hero__ctas { flex-direction: column; align-items: flex-start; }
+      .footer__top { grid-template-columns: 1fr; }
+      .footer__legal { gap: calc(var(--space) * 3); }
+    }
+
+    /* ─── Staggered feature cards ───────────────────────────────────── */
+    .features__grid .feature-card:nth-child(1) { transition-delay: 0ms; }
+    .features__grid .feature-card:nth-child(2) { transition-delay: 100ms; }
+    .features__grid .feature-card:nth-child(3) { transition-delay: 200ms; }
+    .features__grid .feature-card:nth-child(4) { transition-delay: 100ms; }
+    .features__grid .feature-card:nth-child(5) { transition-delay: 200ms; }
+    .features__grid .feature-card:nth-child(6) { transition-delay: 300ms; }
+  </style>
+</head>
+<body>
+
+  <!-- ── 1. NAVBAR ─────────────────────────────────────────────────── -->
+  <header class="navbar" id="navbar">
+    <div class="container">
+      <nav class="navbar__inner">
+        <a href="#" class="navbar__logo">Dashify</a>
+        <ul class="navbar__nav">
+          <li><a href="#features">Features</a></li>
+          <li><a href="#how-it-works">How it works</a></li>
+          <li><a href="#pricing">Pricing</a></li>
+          <li><a href="#footer">Company</a></li>
+        </ul>
+        <div class="navbar__actions">
+          <a href="#" class="navbar__signin">Sign in</a>
+          <a href="#" class="btn btn-primary">Get started free</a>
+        </div>
+      </nav>
+    </div>
+  </header>
+
+  <!-- ── 2. HERO ───────────────────────────────────────────────────── -->
+  <section class="hero" id="hero">
+    <div class="container">
+      <div class="hero__inner">
+        <div class="hero__text reveal">
+          <p class="hero__kicker">
+            <span class="hero__kicker-dot"></span>
+            Now in public beta
+          </p>
+          <h1 class="hero__heading">
+            Your entire business,<br />one clean<br />dashboard.
+          </h1>
+          <p class="hero__sub">
+            Dashify brings together metrics, team tasks, and live reports
+            into a single workspace. Stop context-switching. Start deciding.
+          </p>
+          <div class="hero__ctas">
+            <a href="#" class="btn btn-primary btn-lg">Get started free</a>
+            <a href="#how-it-works" class="btn btn-secondary btn-lg">See how it works</a>
+          </div>
+          <p class="hero__note"><span>No credit card required.</span> Free up to 3 workspaces.</p>
+        </div>
+        <div class="hero__mockup reveal" style="transition-delay: 120ms;">
+          <div class="hero__mockup-bar">
+            <div class="hero__mockup-dot" style="background:#ef4444;"></div>
+            <div class="hero__mockup-dot" style="background:#f59e0b;"></div>
+            <div class="hero__mockup-dot" style="background:#10b981;"></div>
+          </div>
+          <div class="hero__mockup-body">
+            <div class="hero__mockup-card">
+              <div class="hero__mockup-card-label"></div>
+              <div class="hero__mockup-card-value"></div>
+            </div>
+            <div class="hero__mockup-card">
+              <div class="hero__mockup-card-label" style="width:45%;"></div>
+              <div class="hero__mockup-card-value" style="width:65%;"></div>
+            </div>
+            <div class="hero__mockup-card">
+              <div class="hero__mockup-card-label" style="width:70%;"></div>
+              <div class="hero__mockup-card-value" style="width:90%;"></div>
+            </div>
+            <div class="hero__mockup-chart">
+              <div class="hero__mockup-bar-item" style="height:40%;"></div>
+              <div class="hero__mockup-bar-item" style="height:65%;"></div>
+              <div class="hero__mockup-bar-item" style="height:50%;"></div>
+              <div class="hero__mockup-bar-item" style="height:80%;"></div>
+              <div class="hero__mockup-bar-item" style="height:55%;"></div>
+              <div class="hero__mockup-bar-item" style="height:90%;"></div>
+              <div class="hero__mockup-bar-item" style="height:70%;"></div>
+            </div>
+            <div class="hero__mockup-list">
+              <div class="hero__mockup-list-row" style="width:90%;"></div>
+              <div class="hero__mockup-list-row" style="width:70%;"></div>
+              <div class="hero__mockup-list-row" style="width:80%;"></div>
+              <div class="hero__mockup-list-row" style="width:55%;"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── 3. LOGOS BAR ──────────────────────────────────────────────── -->
+  <section class="logos reveal">
+    <div class="container">
+      <p class="logos__label">Trusted by teams at</p>
+      <ul class="logos__list">
+        <li class="logos__item">Meridian</li>
+        <li class="logos__item">Vantage</li>
+        <li class="logos__item">Pinnacle</li>
+        <li class="logos__item">Crescent</li>
+        <li class="logos__item">Axiom</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ── 4. FEATURES ───────────────────────────────────────────────── -->
+  <section class="features" id="features">
+    <div class="container">
+      <div class="section-header reveal">
+        <span class="section-label">Features</span>
+        <h2 class="section-heading">Everything you need, nothing you don't</h2>
+        <p class="section-sub">
+          Built for operators who care about speed and clarity. No bloat, no steep learning curve.
+        </p>
+      </div>
+      <div class="features__grid">
+        <div class="feature-card reveal">
+          <div class="feature-card__icon">📊</div>
+          <h3 class="feature-card__title">Live metrics</h3>
+          <p class="feature-card__desc">Connect your data sources and watch your KPIs update in real time. No more stale spreadsheets.</p>
+        </div>
+        <div class="feature-card reveal">
+          <div class="feature-card__icon">🔗</div>
+          <h3 class="feature-card__title">100+ integrations</h3>
+          <p class="feature-card__desc">Stripe, HubSpot, Postgres, Notion, Slack and more. Connect everything in under two minutes.</p>
+        </div>
+        <div class="feature-card reveal">
+          <div class="feature-card__icon">📋</div>
+          <h3 class="feature-card__title">Shareable reports</h3>
+          <p class="feature-card__desc">Generate polished reports with a single click. Share a live link or export to PDF on the spot.</p>
+        </div>
+        <div class="feature-card reveal">
+          <div class="feature-card__icon">🔔</div>
+          <h3 class="feature-card__title">Smart alerts</h3>
+          <p class="feature-card__desc">Set thresholds on any metric. Get notified via Slack, email, or SMS before things go wrong.</p>
+        </div>
+        <div class="feature-card reveal">
+          <div class="feature-card__icon">👥</div>
+          <h3 class="feature-card__title">Team permissions</h3>
+          <p class="feature-card__desc">Fine-grained access control. Share the right dashboards with the right people, nothing more.</p>
+        </div>
+        <div class="feature-card reveal">
+          <div class="feature-card__icon">🔒</div>
+          <h3 class="feature-card__title">SOC 2 compliant</h3>
+          <p class="feature-card__desc">Enterprise-grade security baked in. Your data is encrypted at rest and in transit, always.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── 5. HOW IT WORKS ───────────────────────────────────────────── -->
+  <section class="howitworks" id="how-it-works">
+    <div class="container">
+      <div class="section-header reveal">
+        <span class="section-label">How it works</span>
+        <h2 class="section-heading">Up and running in minutes</h2>
+        <p class="section-sub">Three straightforward steps to a dashboard your whole team will actually use.</p>
+      </div>
+      <div class="howitworks__steps">
+
+        <div class="howitworks__step">
+          <div class="howitworks__step-content reveal">
+            <div class="howitworks__step-badge">1</div>
+            <h3 class="howitworks__step-title">Connect your sources</h3>
+            <p class="howitworks__step-desc">
+              Pick from our library of 100+ pre-built connectors. Authenticate once and Dashify starts syncing your data automatically — no code required.
+            </p>
+          </div>
+          <div class="howitworks__step-visual reveal" style="transition-delay: 100ms;">
+            <div class="howitworks__step-visual-inner">
+              <div class="step-visual-line" style="width:55%;"></div>
+              <div class="step-visual-line short"></div>
+              <div class="step-visual-dots">
+                <div class="step-visual-dot"></div>
+                <div class="step-visual-dot" style="background:#d1d5db;"></div>
+                <div class="step-visual-dot" style="background:#e9eaec;"></div>
+              </div>
+              <div class="step-visual-box"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="howitworks__step">
+          <div class="howitworks__step-content reveal">
+            <div class="howitworks__step-badge">2</div>
+            <h3 class="howitworks__step-title">Build your dashboard</h3>
+            <p class="howitworks__step-desc">
+              Drag and drop charts, tables, and KPI cards. Choose from dozens of pre-built templates or start from a blank canvas with our visual builder.
+            </p>
+          </div>
+          <div class="howitworks__step-visual reveal" style="transition-delay: 100ms;">
+            <div class="howitworks__step-visual-inner">
+              <div class="step-visual-line medium"></div>
+              <div class="step-visual-box" style="background:#eff0f1; height:30px; margin-top:10px;"></div>
+              <div class="step-visual-box" style="height:36px; margin-top:8px;"></div>
+              <div class="step-visual-line" style="width:40%; margin-top:12px;"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="howitworks__step">
+          <div class="howitworks__step-content reveal">
+            <div class="howitworks__step-badge">3</div>
+            <h3 class="howitworks__step-title">Share &amp; collaborate</h3>
+            <p class="howitworks__step-desc">
+              Invite teammates, set view or edit permissions, and share a public link. Everyone stays aligned without a single status-update meeting.
+            </p>
+          </div>
+          <div class="howitworks__step-visual reveal" style="transition-delay: 100ms;">
+            <div class="howitworks__step-visual-inner">
+              <div class="step-visual-line" style="width:80%;"></div>
+              <div class="step-visual-dots" style="margin-top:16px;">
+                <div class="step-visual-dot" style="width:26px; height:26px;"></div>
+                <div class="step-visual-dot" style="width:26px; height:26px; background:#d1d5db; margin-left:-10px;"></div>
+                <div class="step-visual-dot" style="width:26px; height:26px; background:#e9eaec; margin-left:-10px;"></div>
+              </div>
+              <div class="step-visual-box" style="height:28px; margin-top:14px;"></div>
+              <div class="step-visual-line" style="width:60%; margin-top:10px;"></div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ── 6. PRICING ────────────────────────────────────────────────── -->
+  <section class="pricing" id="pricing">
+    <div class="container">
+      <div class="section-header reveal">
+        <span class="section-label">Pricing</span>
+        <h2 class="section-heading">Simple, honest pricing</h2>
+        <p class="section-sub">Start for free. Upgrade when you're ready. No hidden fees.</p>
+      </div>
+      <div class="pricing__grid">
+
+        <div class="pricing-card pricing-card--free reveal">
+          <p class="pricing-card__name">Free</p>
+          <div class="pricing-card__price">$0</div>
+          <p class="pricing-card__price-note">Forever free · Up to 3 workspaces</p>
+          <div class="pricing-card__divider"></div>
+          <ul class="pricing-card__features">
+            <li class="pricing-card__feature">
+              <span class="pricing-card__check">
+                <svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg>
+              </span>
+              3 connected data sources
+            </li>
+            <li class="pricing-card__feature">
+              <span class="pricing-card__check">
+                <svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg>
+              </span>
+              Up to 10 dashboards
+            </li>
+            <li class="pricing-card__feature">
+              <span class="pricing-card__check">
+                <svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg>
+              </span>
+              24-hour data refresh
+            </li>
+            <li class="pricing-card__feature">
+              <span class="pricing-card__check">
+                <svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg>
+              </span>
+              Community support
+            </li>
+          </ul>
+          <a href="#" class="btn btn-primary">Get started free</a>
+        </div>
+
+        <div class="pricing-card pricing-card--pro reveal" style="transition-delay: 100ms;">
+          <span class="pricing-card__badge">Most popular</span>
+          <p class="pricing-card__name">Pro</p>
+          <div class="pricing-card__price">$29</div>
+          <p class="pricing-card__price-note">Per workspace / month · Billed annually</p>
+          <div class="pricing-card__divider"></div>
+          <ul class="pricing-card__features">
+            <li class="pricing-card__feature">
+              <span class="pricing-card__check">
+                <svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg>
+              </span>
+              Unlimited data sources
+            </li>
+            <li class="pricing-card__feature">
+              <span class="pricing-card__check">
+                <svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg>
+              </span>
+              Unlimited dashboards &amp; reports
+            </li>
+            <li class="pricing-card__feature">
+              <span class="pricing-card__check">
+                <svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg>
+              </span>
+              1-minute data refresh
+            </li>
+            <li class="pricing-card__feature">
+              <span class="pricing-card__check">
+                <svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg>
+              </span>
+              Priority support + SLA
+            </li>
+          </ul>
+          <a href="#" class="btn btn-primary">Start 14-day free trial</a>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ── 7. CTA BANNER ─────────────────────────────────────────────── -->
+  <section class="cta-banner reveal">
+    <div class="container">
+      <h2 class="cta-banner__heading">Ready to see your business clearly?</h2>
+      <p class="cta-banner__sub">Join thousands of teams already running smarter on Dashify.</p>
+      <a href="#" class="btn btn-primary btn-lg">Get started free — no card needed</a>
+    </div>
+  </section>
+
+  <!-- ── 8. FOOTER ─────────────────────────────────────────────────── -->
+  <footer class="footer" id="footer">
+    <div class="container">
+      <div class="footer__top">
+        <div class="footer__brand">
+          <div class="footer__brand-name">Dashify</div>
+          <p class="footer__brand-desc">The business dashboard built for teams who care about speed, clarity, and great design.</p>
+        </div>
+        <div>
+          <p class="footer__col-title">Product</p>
+          <ul class="footer__links">
+            <li><a href="#">Features</a></li>
+            <li><a href="#">Integrations</a></li>
+            <li><a href="#">Pricing</a></li>
+            <li><a href="#">Changelog</a></li>
+          </ul>
+        </div>
+        <div>
+          <p class="footer__col-title">Company</p>
+          <ul class="footer__links">
+            <li><a href="#">About</a></li>
+            <li><a href="#">Blog</a></li>
+            <li><a href="#">Careers</a></li>
+            <li><a href="#">Press kit</a></li>
+          </ul>
+        </div>
+        <div>
+          <p class="footer__col-title">Resources</p>
+          <ul class="footer__links">
+            <li><a href="#">Documentation</a></li>
+            <li><a href="#">Status</a></li>
+            <li><a href="#">Security</a></li>
+            <li><a href="#">Contact</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer__bottom">
+        <p class="footer__copy">&copy; 2026 Dashify, Inc. All rights reserved.</p>
+        <nav class="footer__legal">
+          <a href="#">Privacy</a>
+          <a href="#">Terms</a>
+          <a href="#">Cookies</a>
+        </nav>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // ── Navbar scroll border ──────────────────────────────────────────
+    const navbar = document.getElementById('navbar');
+    window.addEventListener('scroll', () => {
+      navbar.classList.toggle('scrolled', window.scrollY > 60);
+    }, { passive: true });
+
+    // ── Scroll-reveal via IntersectionObserver ────────────────────────
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.15 });
+
+    document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+    // ── Smooth scroll for anchor links ────────────────────────────────
+    document.querySelectorAll('a[href^="#"]').forEach(link => {
+      link.addEventListener('click', e => {
+        const id = link.getAttribute('href');
+        if (id === '#') return;
+        const target = document.querySelector(id);
+        if (target) {
+          e.preventDefault();
+          target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      });
+    });
+  </script>
+</body>
+</html>
